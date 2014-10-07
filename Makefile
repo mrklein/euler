@@ -68,4 +68,4 @@ clean:
 	@$(MAKE) -C libeuler clean
 
 bin/%: src/%.f08
-	$(FC) -o $@ -Jlibeuler $< libeuler/euler_mod.o
+	$(FC) -O3 -o $@ -Jlibeuler $< libeuler/euler_mod.o
