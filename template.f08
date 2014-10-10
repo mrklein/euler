@@ -7,13 +7,13 @@ program euler%N%
   call solution()
   call cpu_time(finish)
 
-  print '("Elapsed time: ", F9.6, " seconds")', finish - start
+  print '("Elapsed time: ", F16.12, " seconds")', finish - start
 contains
   subroutine solution()
     use euler_mod
 
     implicit none
-    
+
     ! TODO
   end subroutine
 end program
