@@ -6,7 +6,7 @@ module euler_mod
     integer(kind=8) :: n2
   end type
 
-  public :: factorial, is_palindrome, is_prime, primes_below, prime_factors, &
+  public :: factorial, is_palindrome, is_prime, primes_below, &
     count_divisors
 contains
   pure function factorial(n) result (r)
@@ -77,7 +77,7 @@ contains
     integer(kind=8), intent (in) :: n
     integer(kind=8), dimension(:), allocatable :: r
 
-    logical, dimension(:), allocatable :: p
+    logical(kind=1), dimension(n) :: sieve
     integer(kind=8) :: l, i, j, idx
 
     if (n == 2) then
@@ -93,61 +93,50 @@ contains
       return
     end if
 
-    if(allocated(p)) deallocate(p)
-    allocate(p(n))
+    sieve = .false.
 
-    p = .false.
+    sieve(2) = .true.
+    sieve(3) = .true.
 
-    p(2) = .true.
-    p(3) = .true.
-
-    l = int(sqrt(real(n))) + 1
+    l = int(sqrt(real(n)))
 
     do i = 1, l
       do j = 1, l
         idx = 4*i*i + j*j
         if (idx <= n .and. (mod(idx, 12) == 1 .or. mod(idx, 12) == 5)) &
-          p(idx) = .not. p(idx)
+          sieve(idx) = .not. sieve(idx)
 
         idx = 3*i*i + j*j
-        if (idx <= n .and. mod(idx, 12) == 7) p(idx) = .not. p(idx)
+        if (idx <= n .and. mod(idx, 12) == 7) &
+          sieve(idx) = .not. sieve(idx)
 
         idx = 3*i*i - j*j
         if (i > j .and. idx <= n .and. mod(idx, 12) == 11) &
-          p(idx) = .not. p(idx)
+          sieve(idx) = .not. sieve(idx)
       end do
     end do
 
     do i = 5, l
-      if (p(i)) then
+      if (sieve(i)) then
         j = 1
         do
           idx = j*i*i
           if (idx > n) exit
-          p(idx) = .false.
+          sieve(idx) = .false.
           j = j + 1
         end do
       end if
     end do
 
-    allocate(r(count(p)))
+    allocate(r(count(sieve)))
 
     idx = 1
     do i = 1, n
-      if (p(i)) then
+      if (sieve(i)) then
         r(idx) = i
         idx = idx + 1
       end if
     end do
-
-    deallocate(p)
-  end function
-
-  pure function prime_factors(n) result (r)
-    implicit none
-
-    integer(kind=8), intent(in) :: n
-    integer(kind=8), dimension(:), allocatable :: r
   end function
 
   pure function prime_factor_weights(n) result (r)
