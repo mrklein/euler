@@ -187,7 +187,7 @@ contains
     end do
 
     do i = 5, l
-      if (p(i)) then
+      if (sieve(i)) then
         j = 1
         do
           idx = j*i*i
