@@ -1,8 +1,13 @@
 module euler_mod
   implicit none
 
+  type :: int_pair_t
+    integer(kind=8) :: n1
+    integer(kind=8) :: n2
+  end type
+
   public :: factorial, is_palindrome, is_prime, primes_below, prime_factors, &
-    divisors_number, primes_below_sub
+    count_divisors
 contains
   pure function factorial(n) result (r)
     implicit none
@@ -138,85 +143,6 @@ contains
     deallocate(p)
   end function
 
-  !> Generate an array of primes smaller than n using sieve of Atkin.
-  !! Subroutine variant to compare speed.
-  !! @param n [in] limit
-  !! @param r [out] array of primes
-  subroutine primes_below_sub(n, r)
-    implicit none
-
-    integer(kind=8), intent(in) :: n
-    integer(kind=8), dimension(:), allocatable, intent (inout) :: r
-
-    logical, dimension(:), allocatable :: p
-    integer(kind=8) :: l, i, j, idx
-
-    if (allocated(r)) deallocate(r)
-
-    if (n == 2) then
-      allocate(r(1))
-      r(1) = 2
-      return
-    end if
-
-    if (n == 5) then
-      allocate(r(2))
-      r(1) = 2
-      r(2) = 3
-      return
-    end if
-
-    if(allocated(p)) deallocate(p)
-    allocate(p(n))
-
-    p = .false.
-
-    p(2) = .true.
-    p(3) = .true.
-
-    l = int(sqrt(real(n))) + 1
-
-    do i = 1, l
-      do j = 1, l
-        idx = 4*i*i + j*j
-        if (idx <= n .and. (mod(idx, 12) == 1 .or. mod(idx, 12) == 5)) &
-          p(idx) = .not. p(idx)
-
-        idx = 3*i*i + j*j
-        if (idx <= n .and. mod(idx, 12) == 7) p(idx) = .not. p(idx)
-
-        idx = 3*i*i - j*j
-        if (i > j .and. idx <= n .and. mod(idx, 12) == 11) &
-          p(idx) = .not. p(idx)
-      end do
-    end do
-
-    do i = 5, l
-      if (p(i)) then
-        j = 1
-        do
-          idx = j*i*i
-          if (idx > n) exit
-          p(idx) = .false.
-          j = j + 1
-        end do
-      end if
-    end do
-
-    allocate(r(count(p)))
-
-    idx = 1
-    do i = 1, n
-      if (p(i)) then
-        r(idx) = i
-        idx = idx + 1
-      end if
-    end do
-
-    deallocate(p)
-
-  end subroutine
-
   pure function prime_factors(n) result (r)
     implicit none
 
@@ -224,7 +150,14 @@ contains
     integer(kind=8), dimension(:), allocatable :: r
   end function
 
-  pure function divisors_number(n) result (r)
+  pure function prime_factor_weights(n) result (r)
+    implicit none
+
+    integer(kind=8), intent(in) :: n
+    type(int_pair_t), dimension(:), allocatable :: r
+  end function
+
+  pure function count_divisors(n) result (r)
     implicit none
 
     integer(kind=8), intent(in) :: n
