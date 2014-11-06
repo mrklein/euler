@@ -208,12 +208,11 @@ contains
         weights(i) = weights(i) + 1
         t = t/d
         i = 1
-        cycle
+      else
+        i = i + 1
       end if
 
       if (t == 1) exit
-
-      i = i + 1
     end do
 
     allocate(r(count(weights > 0)))
