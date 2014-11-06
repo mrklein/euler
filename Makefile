@@ -1,7 +1,7 @@
 TEMPLATE = 'template.f08'
 FC = gfortran
 LD = gfortran
-FFLAGS = -g
+FFLAGS = -O3
 
 .DEFAULT: new
 
