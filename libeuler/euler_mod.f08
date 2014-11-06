@@ -2,8 +2,8 @@ module euler_mod
   implicit none
 
   type :: int_pair_t
-    integer(kind=8) :: n1
-    integer(kind=8) :: n2
+    integer(kind=8) :: fst
+    integer(kind=8) :: snd
   end type
 
   public :: factorial, is_palindrome, is_prime, primes_below, &
@@ -86,10 +86,15 @@ contains
       return
     end if
 
-    if (n == 5) then
+    if (n == 3) then
       allocate(r(2))
-      r(1) = 2
-      r(2) = 3
+      r = [ 2, 3 ]
+      return
+    end if
+
+    if (n == 5) then
+      allocate(r(3))
+      r = [ 2, 3, 5 ]
       return
     end if
 
@@ -139,11 +144,88 @@ contains
     end do
   end function
 
+  pure function prime_factors(n) result(r)
+    implicit none
+
+    integer(kind=8), intent(in) :: n
+    integer(kind=8), dimension(:), allocatable :: r
+
+    integer(kind=8), dimension(:), allocatable :: primes
+    logical(kind=1), dimension(:), allocatable :: factor
+    integer(kind=8) :: i, t, d
+
+    primes = primes_below(n)
+    allocate(factor(size(primes)))
+    factor = .false.
+
+    t = n
+    i = 1
+    do
+      d = primes(i)
+      if (mod(t, d) == 0) then
+        factor(i) = .true.
+        t = t/d
+        i = 1
+        cycle
+      end if
+
+      if (t == 1) exit
+
+      i = i + 1
+    end do
+
+    allocate(r(count(factor)))
+
+    i = 1
+    do t = lbound(factor, 1, 8), ubound(factor, 1, 8)
+      if (factor(t)) then
+        r(i) = primes(t)
+        i = i + 1
+      end if
+    end do
+  end function
+
   pure function prime_factor_weights(n) result (r)
     implicit none
 
     integer(kind=8), intent(in) :: n
     type(int_pair_t), dimension(:), allocatable :: r
+
+    integer(kind=8), dimension(:), allocatable :: primes, weights
+    integer(kind=8) :: i, t, d
+
+    primes = primes_below(n)
+    allocate(weights(size(primes)))
+    weights = 0_8
+
+    t = n
+    i = 1
+
+    do
+      d = primes(i)
+
+      if (mod(t, d) == 0) then
+        weights(i) = weights(i) + 1
+        t = t/d
+        i = 1
+        cycle
+      end if
+
+      if (t == 1) exit
+
+      i = i + 1
+    end do
+
+    allocate(r(count(weights > 0)))
+
+    i = 1
+    do t = lbound(weights, 1, 8), ubound(weights, 1, 8)
+      if (weights(t) > 0) then
+        r(i)%fst = primes(t)
+        r(i)%snd = weights(t)
+        i = i + 1
+      end if
+    end do
   end function
 
   pure function count_divisors(n) result (r)
@@ -152,8 +234,19 @@ contains
     integer(kind=8), intent(in) :: n
     integer(kind=8) :: r
 
-    integer(kind=8), dimension(:), allocatable :: factors
+    integer(kind=8) :: i
+    type(int_pair_t), dimension(:), allocatable :: w
 
-    factors = primes_below(int(sqrt(real(n)), kind=8) + 1_8)
+    if (n == 1) then
+      r = 1
+      return
+    end if
+
+    w = prime_factor_weights(n)
+
+    r = 1
+    do i = lbound(w, 1, 8), ubound(w, 1, 8)
+      r = r * (w(i)%snd + 1)
+    end do
   end function
 end module

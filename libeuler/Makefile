@@ -1,5 +1,5 @@
 FC = gfortran
-FFLAGS := -O3
+FFLAGS := -g
 
 all: euler_mod.o
 
